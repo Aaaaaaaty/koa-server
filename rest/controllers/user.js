@@ -4,7 +4,6 @@ class UserController {
   // 用户注册
   static async register(ctx) {
     const { name, password } = ctx.request.body;
-    console.log(ctx.request.body)
     if(!name||!password) {
       return ctx.error({ msg: '用户名或密码不能为空!' });
     }
