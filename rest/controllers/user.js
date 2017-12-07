@@ -1,24 +1,21 @@
-const mongoose = require('mongoose');
-const { UserModel } = require('../models/index');
+const { UserModel } = require('../models/index')
 class UserController {
-  // 用户注册
-  static async register(ctx) {
-    const { name, password } = ctx.request.body;
-    if(!name||!password) {
-      return ctx.error({ msg: '用户名或密码不能为空!' });
+  // 新建用户
+  static async createMember(ctx) {
+    const _body = ctx.request.body
+    const { name, password, account, authorityLevel } = _body;
+    if(undefined === (name && password && account && authorityLevel)) {
+      return ctx.error({ msg: '信息填写不完整!' })
     }
-    // if(password!=apassword) {
-    //   return ctx.error({ msg: '两次输入的密码不一致!' });
-    // }
-    const ishas = await UserModel.findOne({ name });
-    if(ishas){
-      return ctx.error({ msg: '该用户已存在!' });
+    const isHas = await UserModel.findOne({ account })
+    if(isHas){
+      return ctx.error({ msg: '该用户已存在!' })
     }     
-    const result = await UserModel.create({ name, password });
+    const result = await UserModel.create( _body )
     if(!result) {
-     return ctx.error({ msg: '注册失败!' });
+     return ctx.error({ msg: '注册失败!' })
     }
-    return ctx.success({ msg:'注册成功' });
+    return ctx.success({ msg:'注册成功' })
   }
 }
 
