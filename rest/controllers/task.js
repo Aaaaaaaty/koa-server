@@ -19,19 +19,51 @@ class TaskController {
 	//修改任务
 	static async updateTask(ctx) {
 		const _body = ctx.request.body
-		const {  _id, name, demandPerson, type, emergency, fields, systemFunction } = _body;
-		if(undefined === ( name && demandPerson && type && emergency && fields && systemFunction ))
+		const {  _id, name, demandPerson, type, emergency, fields, systemFunction, makeTime, designTime, maker, designer } = _body;
+		if(undefined === ( _id && name && demandPerson && type && emergency && fields && systemFunction ))
+			//数据必须数据 防止修改后更改成undefined
 			return ctx.error({ msg: '缺少必要的任务信息!'})
 		const isUpdate = await TaskModel.findOneAndUpdate({ _id: _id },{
 			$set:_body
 		})
-		if (isUpdate)
-			return ctx.success({ msg: '任务已更新!' })
+		if (undefined !== ((makeTime && maker) || (designTime && designer))) {
+			async function updateScheduleTask(time, user) { //更新任务中如果修改了排期信息则添加到个人排期中
+				let { scheduleTaskList } = await UserModel.findOne({ account: designer })
+				if (!scheduleTaskList && scheduleTaskList.length) {
+					scheduleTaskList = []
+				} else {
+					let isHasSchedule = false
+					scheduleTaskList = scheduleTaskList.map((item, index) => {
+						if (item.taskId === _id) {
+							isHasSchedule = true
+							return { name: name, time: designTime, taskId: _id }
+						} else {
+							return item
+						}
+					})
+					if (!isHasSchedule) scheduleTaskList.push({ name: name, time: designTime, taskId: _id })
+				}
+				const result = await UserModel.findOneAndUpdate({ account: designer }, {
+					$set: { scheduleTaskList }
+				})
+				return result
+			}
+			if(makeTime && maker) {
+				if(!updateScheduleTask(makeTime, maker)) return ctx.error({ msg: '排期更新出错!'})
+			}
+			if(designTime && designer) {
+				
+				if(!updateScheduleTask(designTime, designer)) return ctx.error({ msg: '排期更新出错!'})
+			}
+		}
+		return ctx.success({ msg: '任务已更新!' })
 	}
+
+	
 
 	//删除任务
 	static async deleteTask(ctx) {
-		const { _id, name } = ctx.request.body;
+		const { _id } = ctx.request.body;
 		const isRemove = await TaskModel.remove({_id: _id})
 		if (isRemove) 
 			return ctx.success({ msg: '任务已删除!' })

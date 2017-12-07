@@ -10,14 +10,14 @@ const TaskSchema = new Schema({
 	emergency: { type: Boolean, required: true },         // 是否紧急
 	fields: { type: Number, required: true },             // 0：fe; 1:design; 2:all
 	systemFunction: { type: Number, required: true },     // 0:none; 1:api; 2:nest
-	releaseTime: { type: Number },                          // 上线时间
-	expectReleaseTime: { type: Object },                    // 预计上线时间
-	expectDesignTime: { type: Object },                     // 预计设计时间
-	expectMakeTime: { type: Object },                       // 预计制作时间
+	releaseTime: { type: Number },                        // 上线时间
+	expectReleaseTime: { type: Number },                  // 预计上线时间
+	expectDesignTime: { type: Object },                   // 预计设计时间
+	expectMakeTime: { type: Object },                     // 预计制作时间
 	expectDesigner: { type: Object },                     // 预计设计人员{boss: String, subordinate: String}
 	expectMaker: { type: Object },                        // 预计制作人员{boss: String, subordinate: String}
-	designTime: { type: Object },                           // 设计时间
-	makeTime: { type: Object },                             // 制作时间
+	designTime: { type: Object },                         // 设计时间
+	makeTime: { type: Object },                           // 制作时间
 	designer: { type: String },                           // 设计人员
 	maker: { type: String },                              // 制作人员
 	serverUrl: { type: String },						  // 服务器地址
