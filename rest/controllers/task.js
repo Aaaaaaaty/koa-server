@@ -71,25 +71,30 @@ class TaskController {
 
     //获取任务列表
 	static async getTaskList(ctx) {
-	const result = await TaskModel.find()
-	if(result) 
-		return ctx.success({data: result, msg: '获取任务列表成功!'})
+		const { page, limit } = ctx.request.body
+		let pageNum = parseInt(page) || 1,
+			pageLimit = parseInt(limit) || 10
+		const result = await TaskModel.find().limit(pageLimit).skip((pageNum - 1) * pageLimit)
+		if (result)
+			return ctx.success({ data: result, msg: '获取任务列表成功!' })
 	}
 	//提交的任务（编辑权限）
 	static async getPostTaskList(ctx) {
-		const { account } = ctx.request.body //editor account
+		const { account, page, limit } = ctx.request.body //editor's account; 第几页； 每页多少条数据
 		const { authorityLevel } = await UserModel.findOne({ account })
-		if(authorityLevel === 2) {
-		const postTaskList = await TaskModel.find({ demandPerson: account })
-		if(postTaskList)
-			return ctx.success({data: postTaskList, msg: '获取提交任务成功!'})
+		if (authorityLevel === 2) {
+			let pageNum = parseInt(page) || 1,
+				pageLimit = parseInt(limit) || 10
+			const postTaskList = await TaskModel.find({ demandPerson: account }).limit(pageLimit).skip((pageNum - 1) * pageLimit)
+			if (postTaskList)
+				return ctx.success({ data: postTaskList, msg: '获取提交任务成功!' })
 		} else {
-			return ctx.error({msg: '该权限无法获取已提交任务'})
+			return ctx.error({ msg: '该权限无法获取已提交任务' })
 		}
 	}
     //待排期任务（组长权限）
 	static async getWaitingScheduleTaskList(ctx) {
-		const { account } = ctx.request.body // leader's account
+		const { account, page, limit } = ctx.request.body // leader's account
 		if (!account) return ctx.error({ msg: '缺少关键查询信息!' })
 		const { authorityLevel, occupation } = await UserModel.findOne({ account })
 		//通过级别与职业信息匹配出待排期任务
@@ -108,15 +113,19 @@ class TaskController {
 					return undefined === ( item.designTime && item.designer )
 				})
 			}
-			if (waitingScheduleTaskList)
-				return ctx.success({ data: waitingScheduleTaskList, msg: '获取待排期任务成功!'})
+			if (waitingScheduleTaskList) {
+				let pageNum = parseInt(page) || 1,
+					pageLimit = parseInt(limit) || 10
+				let taskList = waitingScheduleTaskList.slice(pageNum - 1, pageNum * pageLimit) //pageLimit = 0会取出第一个
+				return ctx.success({ data: taskList, msg: '获取待排期任务成功!' })
+			}
 		} else {
 			ctx.error({ msg: '该账户没有此权限!'})
 		}
 	}
     //待处理任务（组员权限、组长权限）
 	static async getWaitingDealTaskList(ctx) {
-		const { account } = ctx.request.body
+		const { account, page, limit } = ctx.request.body
 		if(!account) return ctx.error({ msg: '缺少关键请求信息!'})
 		const { authorityLevel, occupation } = await UserModel.findOne({ account })
 		if (authorityLevel === 1 && (occupation === 0 || occupation === 1)) {
@@ -126,8 +135,12 @@ class TaskController {
 			} else if (occupation === 1) { //designer
 				waitingDealTaskList = await TaskModel.find({ designer: account })
 			}
-			if (waitingDealTaskList)
-				return ctx.success({ data: waitingDealTaskList, msg: '获取待处理任务成功!'})
+			if (waitingDealTaskList) {
+				let pageNum = parseInt(page) || 1,
+					pageLimit = parseInt(limit) || 10
+				let taskList = waitingDealTaskList.slice(pageNum - 1, pageNum * pageLimit)
+				return ctx.success({ data: taskList, msg: '获取待处理任务成功!' })
+			}
 		} else {
 			ctx.error({ msg: '该账户没有此权限!'})
 		}

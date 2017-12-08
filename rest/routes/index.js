@@ -13,7 +13,7 @@ router
   .post('/api/user/create_member', UserController.createMember)                                  // 用户注册                
   .post('/api/user/update_member', UserController.updateMember)                                  // 更新用户
   .post('/api/user/delete_member', UserController.deleteMember)                                  // 删除用户
-  .post('/api/user/get_memberInfo', UserController.getMemberInfo)
+  .post('/api/user/get_memberInfo', UserController.getMemberInfo)                                // 获取用户信息
   // 任务相关api
   .post('/api/task/create_task', TaskController.createTask)                                      // 创建任务
   .post('/api/task/update_task', TaskController.updateTask)                                      // 更新任务
